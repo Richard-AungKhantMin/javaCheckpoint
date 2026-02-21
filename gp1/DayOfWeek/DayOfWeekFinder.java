@@ -2,27 +2,33 @@ package gp1.DayOfWeek;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class DayOfWeekFinder {
     public String findNextDayOfWeek(String startDate, String dayOfWeek) {
-        try {
-            LocalDate start = LocalDate.parse(startDate);
-            DayOfWeek targetDay = DayOfWeek.valueOf(dayOfWeek.toUpperCase());
-            DayOfWeek currentDay = start.getDayOfWeek();
+        
+        try{
             
-            int currentDayValue = currentDay.getValue();
-            int targetDayValue = targetDay.getValue();
-            int daysToAdd = targetDayValue - currentDayValue;
-            
-            // If target day is today or already passed, go to next week
-            if (daysToAdd <= 0) {
-                daysToAdd += 7;
-            }
-            
-            LocalDate nextDate = start.plusDays(daysToAdd);
-            return nextDate.toString();
-        } catch (Exception e) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate start = LocalDate.parse(startDate, format);
+        
+        DayOfWeek targetDay = DayOfWeek.valueOf(dayOfWeek.toUpperCase());
+        DayOfWeek startDay = start.getDayOfWeek();
+        
+        int diff = targetDay.getValue() - startDay.getValue();
+        
+        if (diff <= 0){
+            diff = diff + 7;
+        }
+        
+        start = start.plusDays(diff);
+        
+        return start.toString();
+        
+        }catch (Exception e){
             return "Error";
         }
+        
+        
     }
 }
