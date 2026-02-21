@@ -1,27 +1,28 @@
 package gp1.TodoList;
 
-class Task {
+public class Task {
     private String description;
     private TaskStatus status;
 
-    public Task(String description) {
-        this.description = description;
+    public Task(String d){
+        this.description = d;
         this.status = TaskStatus.NEW;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    public void setDescription(String description) {
+    public void setDescription(String description){
         this.description = description;
     }
-
-    public void setStatus(TaskStatus status) {
+    
+    public void setStatus(TaskStatus status){
         this.status = status;
     }
+    
+     public String getDescription(){
+        return this.description;
+    }
+    
+     public TaskStatus getStatus(){
+        return this.status;
+    }
+   
 }
