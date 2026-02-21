@@ -1,4 +1,4 @@
-package TodoList;
+package gp1.TodoList;
 
 class Task {
     private String description;

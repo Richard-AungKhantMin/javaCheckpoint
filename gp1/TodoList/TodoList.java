@@ -1,4 +1,4 @@
-package TodoList;
+package gp1.TodoList;
 
 public class TodoList {
     private Task[] tasks;

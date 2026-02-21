@@ -1,4 +1,4 @@
-package TimeTracker;
+package gp1.TimeTracker;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

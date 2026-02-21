@@ -1,4 +1,4 @@
-package MultiplicationTable;
+package gp1.MultiplicationTable;
 
 public class MultiplicationTable {
     public static void generate(int num) {

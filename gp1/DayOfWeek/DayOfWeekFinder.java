@@ -1,4 +1,4 @@
-package DayOfWeek;
+package gp1.DayOfWeek;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

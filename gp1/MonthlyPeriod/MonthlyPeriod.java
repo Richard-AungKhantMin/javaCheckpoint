@@ -1,4 +1,4 @@
-package MonthlyPeriod;
+package gp1.MonthlyPeriod;
 
 import java.time.LocalDate;
 import java.time.Period;
