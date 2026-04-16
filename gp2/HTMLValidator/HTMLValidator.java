@@ -1,21 +1,6 @@
 package gp2.HTMLValidator;
 public class HTMLValidator {
-//    private class TagResult {
-//        private boolean found;
-//        private String html;
 
-//        public TagResult(boolean found, String html) {
-//            this.found = found;
-//            this.html = html;
-//        }
-//        public boolean getFound() {
-//            return this.found;
-//        }
-//        public String getHtml()
-//        {
-//            return this.html;
-//        }
-//    }
     public boolean validateHTML(String html) {
         if (html == null || html.isBlank()) {
             return true;
@@ -81,3 +66,4 @@ public class HTMLValidator {
     }
 
 }
+

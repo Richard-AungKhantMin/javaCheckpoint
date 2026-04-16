@@ -41,3 +41,7 @@ public class AlmostPalindrome {
         return true;
     }
 }
+
+for (int each : arr){
+
+}
