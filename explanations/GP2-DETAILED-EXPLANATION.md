@@ -856,83 +856,181 @@ host=localhost
 
 ---
 
-### The Solution
+### The Solution (Smart Regex Approach)
 
 ```java
 public String hideSensitiveData(String configFile, List<String> sensitiveKeys) {
-    String result = "";
-    if (sensitiveKeys.isEmpty()) {
-        return configFile; // Nothing to hide
-    }
-```
+    String protectedConfig = configFile;
 
----
+    for (String key : sensitiveKeys) {
+        Pattern pattern = Pattern.compile("(?<=" + Pattern.quote(key) + "=).*");
+        Matcher matcher = pattern.matcher(protectedConfig);
 
-```java
-    String pattern = "^([^=]+)=(.*?)$";
-    Matcher matcher = Pattern.compile(pattern, Pattern.MULTILINE).matcher(configFile);
-```
-
-**The pattern:** `^([^=]+)=(.*?)$`
-- `^` = Start of line
-- `([^=]+)` = Group 1: one or more characters that are NOT `=` (the KEY)
-- `=` = literal equals sign
-- `(.*?)` = Group 2: any characters, non-greedy (the VALUE)
-- `$` = End of line
-
-**Pattern.MULTILINE:** Process multiple lines separately (each line is start-to-end).
-
-**Example:**
-```
-Line: "password=secret"
-
-Group 1: "password" (before =)
-Group 2: "secret" (after =)
-```
-
----
-
-```java
-    while (matcher.find()) {
-        result += matcher.group(1) + "="; // Add key and equals sign
-```
-
-**For each line matched:**
-1. Add the key
-2. Add the equals sign
-
----
-
-```java
-        if (sensitiveKeys.contains(matcher.group(1))) {
-            for (int i = 0; i < matcher.group(2).length(); i++) {
-                result += "*";
-            }
-        } else {
-            result += matcher.group(2);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String value = matcher.group();                   
+            String masked = "*".repeat(value.length());       
+            matcher.appendReplacement(sb, masked);          
         }
-        result += "\n";
+        matcher.appendTail(sb);                               
+        protectedConfig = sb.toString();                       
     }
-    return result;
+    return protectedConfig;
 }
 ```
 
-**If the key is sensitive:**
-- Count characters in the value
-- Add that many asterisks
+---
 
-**If the key is not sensitive:**
-- Add the value as-is
+### How It Works - Step by Step
+
+**Main idea:** Process each sensitive key one at a time, replacing its value with asterisks.
+
+```java
+for (String key : sensitiveKeys) {
+```
+
+**For each sensitive key**, create a pattern to find and replace its value.
+
+---
+
+#### The Regex Pattern
+
+```java
+Pattern pattern = Pattern.compile("(?<=" + Pattern.quote(key) + "=).*");
+```
+
+**What's `(?<=...)`?** This is a **lookbehind** assertion. It means "match what follows IF it's preceded by..."
+
+**Breaking it down:**
+- `(?<=` = Start of lookbehind (what must come before)
+- `Pattern.quote(key)` = Escape special regex characters in the key
+- `=` = Literal equals sign
+- `)` = End of lookbehind
+- `.*` = Match any characters (the VALUE)
 
 **Example:**
 ```
 Key: "password"
-Value: "secret" (length 6)
-Is "password" in sensitiveKeys? YES
-Add 6 asterisks: "******"
+Pattern: (?<=password=).*
 
-Line becomes: "password=******"
+String: "password=secret123"
+Matches: "secret123" (everything AFTER "password=")
+
+String: "username=admin"
+Matches: NOTHING (doesn't start with "password=")
 ```
+
+---
+
+#### Why Pattern.quote(key)?
+
+What if someone has a sensitive key with regex special characters?
+
+```
+Key: "database.url"  // Contains a dot!
+
+Without quote:
+Pattern: (?<=database.url=).*
+The dot means "any character" in regex!
+
+With quote:
+Pattern: (?<=database\.url=).*
+The dot is escaped, now it's literal!
+```
+
+**`Pattern.quote()` automatically escapes:** `\ ^ $ . | ? * + ( ) [ ] { }`
+
+---
+
+#### Using StringBuffer for Replacement
+
+```java
+StringBuffer sb = new StringBuffer();
+while (matcher.find()) {
+    String value = matcher.group();                   
+    String masked = "*".repeat(value.length());       
+    matcher.appendReplacement(sb, masked);          
+}
+matcher.appendTail(sb);
+```
+
+**What's StringBuffer?** A way to efficiently build strings with replacements.
+
+**Three steps:**
+1. `matcher.find()` - Find the next match
+2. `matcher.group()` - Get the matched value
+3. `matcher.appendReplacement(sb, masked)` - Replace it with asterisks
+
+**Then:** `matcher.appendTail(sb)` - Add everything after the last match
+
+---
+
+#### String.repeat() - Elegant Asterisks
+
+```java
+String masked = "*".repeat(value.length());
+```
+
+**Instead of a loop:**
+```java
+// Old way (verbose):
+for (int i = 0; i < value.length(); i++) {
+    result += "*";
+}
+
+// New way (clean):
+"*".repeat(value.length());
+```
+
+**Example:**
+```
+value = "secret123" (length 9)
+masked = "*".repeat(9) = "*********"
+```
+
+---
+
+### Complete Example Trace
+
+```
+Input: "username=admin\npassword=secret123\nhost=localhost"
+SensitiveKeys: ["password", "host"]
+
+Iteration 1: key = "password"
+  Pattern: (?<=password=).*
+  
+  Match 1 in "password=secret123"
+    value = "secret123" (length 9)
+    masked = "*********"
+    Replace: "password=secret123" → "password=*********"
+  
+  Result after password: "username=admin\npassword=*********\nhost=localhost"
+
+Iteration 2: key = "host"
+  Pattern: (?<=host=).*
+  
+  Match 1 in "host=localhost"
+    value = "localhost" (length 9)
+    masked = "*********"
+    Replace: "host=localhost" → "host=*********"
+  
+  Result after host: "username=admin\npassword=*********\nhost=*********"
+
+Final Output: "username=admin\npassword=*********\nhost=*********"
+```
+
+---
+
+### Why This Approach is Better
+
+**Advantages:**
+- ✅ **Per-key iteration** - Process one sensitive key at a time
+- ✅ **Cleaner logic** - No need to reconstruct lines manually
+- ✅ **Uses proper Matcher API** - `appendReplacement` is purpose-built for this
+- ✅ **Handles edge cases** - Special regex characters automatically escaped
+- ✅ **Reusable pattern** - Same logic works for any number of sensitive keys
+
+**Lookbehind benefit:** Matches only values that DIRECTLY follow `key=`, not similar patterns elsewhere.
 
 ---
 
