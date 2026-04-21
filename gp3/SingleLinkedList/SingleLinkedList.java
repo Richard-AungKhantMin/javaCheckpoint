@@ -10,7 +10,6 @@ public class SingleLinkedList implements LinkedList {
 
         Node(int value) {
             this.value = value;
-            this.next = null;
         }
     }
 

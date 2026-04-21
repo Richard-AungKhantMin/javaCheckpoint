@@ -15,30 +15,24 @@ public class DoubleLinkedList implements LinkedList {
         }
     }
     
-    public Node goToIndex(int index){
-        Node current;
-        int step = index;
-        
-        if (head == null){
-            current = head;
-        }else if (tail == null){
-            current = tail;
-        }else if (index <= (size - 1)/2){
-            current = head;
-            
-            
-            for(int i = 0; i < step ; i++){
-                current = next(current);
-            }
-        }else{
-            current = tail;
-            
-            for (int i = size -1; i> step;i--){
-                current = prev(current);
-            }
+  public Node goToIndex(int index){
+    if (index <= (size - 1) / 2) {
+        // Closer to head - traverse forward
+        Node current = this.head;
+        for (int i = 0; i < index; i++){
+            current = this.next(current);
+        }
+        return current;
+
+    } else {
+        // Closer to tail - traverse backward
+        Node current = this.tail;
+        for (int i = size - 1; i > index; i--){
+            current = this.prev(current);
         }
         return current;
     }
+}
 
     @Override
     public int at(int index) {
@@ -53,10 +47,12 @@ public class DoubleLinkedList implements LinkedList {
        Node newNode = new Node(value);
        
        if(head == null){
-           head =tail= newNode;
+          head = newNode;
+          tail = newNode;
        }else{
            tail.next = newNode;
            newNode.prev = tail;
+           
            tail = newNode;
        }
        size++;
@@ -67,17 +63,26 @@ public class DoubleLinkedList implements LinkedList {
         if(index <0|| index >= size) return;
         
         Node current = goToIndex(index);
-        if(current.prev!= null){
-            current.prev.next = current.next;
-        }else{
-            head = current.next;
+
+        if (index == 0) {
+    
+        head = current.next;
+        size--;
+        return;
+
         }
-                   
-        if (current.next != null){
-            current.next.prev = current.prev;
-        }else{
+        
+        if (index == size - 1) {
+    
             tail = current.prev;
+           size--;
+           return;
+
         }
+
+        current.prev.next = current.next;
+        current.next.prev = current.prev;
+
         size--;
     }
 

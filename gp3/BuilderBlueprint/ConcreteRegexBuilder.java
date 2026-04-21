@@ -1,34 +1,16 @@
 package gp3.BuilderBlueprint;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
 public class ConcreteRegexBuilder implements RegexBuilder {
     List<String> component;
-    public ConcreteRegexBuilder() {
-        component = new ArrayList<>();
-    }
-    @Override
-    public Regex getResult() {
-        return new Regex(component);
-    }
-    @Override
 
+    public ConcreteRegexBuilder(){
+        component = new ArrayList();
+    }
+
+
+    @Override
     public void buildLiteral(String literal){
-        String escaped = literal.replace("\\", "\\\\")
-                .replace(".", "\\.")
-                .replace("*", "\\*")
-                .replace("+", "\\+")
-                .replace("?", "\\?")
-                .replace("^", "\\^")
-                .replace("$", "\\$")
-                .replace("[", "\\[")
-                .replace("]", "\\]")
-                .replace("{", "\\{")
-                .replace("}", "\\}")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-                .replace("|", "\\|");
-        component.add(escaped);
+        component.add(literal);
     }
     @Override
     public void buildAnyCharacter(){
@@ -43,8 +25,11 @@ public class ConcreteRegexBuilder implements RegexBuilder {
         component.add("\\s");
     }
     @Override
-    public void buildWordCharacter() {
+    public void buildWordCharacter(){
         component.add("\\w");
     }
-
+    @Override
+    public Regex getResult() {
+        return new Regex(component);
+    }
 }
